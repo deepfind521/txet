@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>新年祝福</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+        .lantern {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background-color: #e74c3c;
+            border-radius: 30px;
+            border: 3px solid #f1c40f;
+            box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+            transition: transform 0.3s ease;
+        }
+        .lantern::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            background-color: #f1c40f;
+            border-radius: 5px 5px 0 0;
+        }
+        .lantern::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background-color: #f1c40f;
+        }
+        .lantern .line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #f1c40f;
+            left: 0;
+        }
+        .lantern .line.top { top: 25%; }
+        .lantern .line.middle { top: 50%; }
+        .lantern .line.bottom { top: 75%; }
+        #fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .blessing {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+            z-index: 2;
+            line-height: 1.5;
+        }
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .snowflake {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 灯笼元素 -->
+    <div class="lantern" style="left: 15%; top: 10%;">
+        <div class="line top"></div>
+        <div class="line middle"></div>
+        <div class="line bottom"></div>
+    </div>
+    <div class="lantern" style="left: 85%; top: 10%;">
+        <div class="line top"></div>
+        <div class="line middle"></div>
+        <div class="line bottom"></div>
+    </div>
+    <div class="lantern" style="left: 30%; top: 20%;">
+        <div class="line top"></div>
+        <div class="line middle"></div>
+        <div class="line bottom"></div>
+    </div>
+    <div class="lantern" style="left: 70%; top: 20%;">
+        <div class="line top"></div>
+        <div class="line middle"></div>
+        <div class="line bottom"></div>
+    </div>
+
+    <!-- 烟花画布 -->
+    <canvas id="fireworks"></canvas>
+
+    <!-- 祝福文字 -->
+    <h1 class="blessing">新年快乐 万事如意<br>阖家幸福 身体健康<br>岁岁常欢愉 年年皆胜意</h1>
+
+    <!-- 飘雪容器 -->
+    <div class="snowflakes"></div>
+
+    <script>
+        // 灯笼摇晃动画
+        const lanterns = document.querySelectorAll('.lantern');
+        lanterns.forEach((lantern, index) => {
+            setInterval(() => {
+                const angle = Math.sin(Date.now() / 500 + index) * 8;
+                lantern.style.transform = `rotate(${angle}deg)`;
+            }, 50);
+        });
+
+        // 烟花动画
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function createFirework(x, y) {
+            const particles = [];
+            const count = 120;
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: Math.random() * 2 + 1,
+                    color: `hsl(${Math.random() * 60 + 0}, 100%, 50%)`,
+                    alpha: 1
+                });
+            }
+            return particles;
+        }
+
+        let fireworks = [];
+        function animateFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 随机生成新烟花
+            if (Math.random() < 0.03) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height * 0.4;
+                fireworks.push(createFirework(x, y));
+            }
+
+            // 更新并绘制粒子
+            fireworks.forEach((particles, idx) => {
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05; // 重力
+                    p.alpha -= 0.01;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.color.split('(')[1].split(',')[0]}, 100%, 50%, ${p.alpha})`;
+                    ctx.fill();
+                });
+                // 移除消失的烟花
+                if (particles[0].alpha <= 0) fireworks.splice(idx, 1);
+            });
+
+            requestAnimationFrame(animateFireworks);
+        }
+        animateFireworks();
+
+        // 飘雪效果
+        const snowflakes = document.querySelector('.snowflakes');
+        for (let i = 0; i < 80; i++) {
+            const flake = document.createElement('div');
+            flake.classList.add('snowflake');
+            flake.style.left = `${Math.random() * 100}vw`;
+            flake.style.top = `${Math.random() * -100}px`;
+            flake.style.width = `${Math.random() * 5 + 2}px`;
+            flake.style.height = flake.style.width;
+            flake.style.animationDuration = `${Math.random() * 8 + 5}s`;
+            flake.style.animationDelay = `${Math.random() * 5}s`;
+            snowflakes.appendChild(flake);
+        }
+    </script>
+</body>
+</html>
